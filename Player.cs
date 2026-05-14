@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using TMPro;
 using UnityEngine;
 
 public class Player : Character
@@ -8,21 +9,40 @@ public class Player : Character
     public static Player obj;
     [SerializeField]private float maxSpeed = 10f;
     [SerializeField]private float minY;
-    [SerializeField]private float maxY;
     [SerializeField]public bool isCombat = false;
+    [SerializeField]public bool canParry;
+    [SerializeField]public bool parrySuccess;
+    [SerializeField] private float parryCooldown = 3f;
+    [SerializeField] private float minClickInterval = 0.1f;
+
+    private bool canAttemptParry = true;
+    public bool canDoubleAttack = false;
+    private bool canAttemptDoubleAttack = true;
+    public bool doubleAttackSuccess;
     private Camera mainCamera;
-    public Vector2 currentPosition;
-    private Vector2 basePosition;
-    private Vector2 targetPos;
     public string lastSpawnPoint = "MainGame";
+    private float lastClickTime;
+    private float doubleAttackWindowStart;
+    private float doubleAttackWindowEnd;
 
     void Start(){
         mainCamera = Camera.main;
         //basePosition = transform.position;
+
+        //Estos son atributos de la clase Character
+        lifeText.text = hp.ToString();
     }
 
-    void Update(){
-
+    void Update(){        
+        //Ataque y doble ataque 
+        if(Input.GetMouseButtonDown(0) && isCombat){
+            if(isCombat){
+                TryParry();
+                TryDoubleAttack();
+            }
+        }
+        
+        //Movimiento del personaje
         if (Input.GetMouseButton(0) && !isCombat){
             FollowMousePositionDelayed(maxSpeed);
         }
@@ -89,6 +109,69 @@ public class Player : Character
         }
     }
 
+    public IEnumerator AttackCoroutine(){
+        Enemy enemy = CombatController.obj.selectedEnemy;
+        if(enemy == null){
+            yield break;
+        }
 
+        doubleAttackSuccess = false;
+        Attack();
+
+        yield return new WaitForSeconds(0.5f);
+
+        canDoubleAttack = true;
+        doubleAttackWindowStart = Time.time;
+        doubleAttackWindowEnd = Time.time + 0.3f;
+        stateText.text = "Otra vez";
+
+        yield return new WaitForSeconds(0.2f);
+
+        canDoubleAttack = false;
+        stateText.text = "";
+
+        if(doubleAttackSuccess){
+            yield return StartCoroutine(ShowText("Double", 0.5f));
+
+            enemy.TakeDamage(attack);
+        }
+    }
+    
+    public void TryParry(){
+        if (!canAttemptParry){
+            return;
+        }
+
+        canAttemptParry = false;
+        StartCoroutine(ParryCooldown());
+
+        if(canParry){
+            parrySuccess = true;
+        }
+    }
+
+    IEnumerator ParryCooldown(){
+        yield return new WaitForSeconds(parryCooldown);
+
+        canAttemptParry = true;
+    }
+
+    public void TryDoubleAttack(){
+        if (!canDoubleAttack){
+            return;
+        }
+
+        float clickTime = Time.time;
+
+        if(clickTime >= doubleAttackWindowStart && clickTime <= doubleAttackWindowEnd){
+            doubleAttackSuccess = true;
+            canDoubleAttack = false;
+        }
+    }
+
+    IEnumerator DoubleAttackCooldown(float time){
+        yield return new WaitForSeconds(time);
+        canAttemptDoubleAttack = true;
+    }
 
 }
