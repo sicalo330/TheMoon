@@ -12,13 +12,13 @@ public class Player : Character
     [SerializeField]public bool isCombat = false;
     [SerializeField]public bool canParry;
     [SerializeField]public bool parrySuccess;
-    [SerializeField] private float parryCooldown = 3f;
     [SerializeField] private float minClickInterval = 0.1f;
-
-    private bool canAttemptParry = true;
     public bool canDoubleAttack = false;
     private bool canAttemptDoubleAttack = true;
     public bool doubleAttackSuccess;
+    private bool waitingForDoubleAttackInput;
+    private bool doubleAttackAttempted;
+    public bool parryAttempted;
     private Camera mainCamera;
     public string lastSpawnPoint = "MainGame";
     private float lastClickTime;
@@ -104,30 +104,37 @@ public class Player : Character
     //------------------Escena combate----------------------
 
     public void Attack(){
-        if(CombatController.obj.selectedEnemy != null){
-            CombatController.obj.selectedEnemy.TakeDamage(attack);
+            if(CombatController.obj.selectedEnemy != null){
+                CombatController.obj.selectedEnemy.TakeDamage(attack);
+            }
         }
-    }
 
     public IEnumerator AttackCoroutine(){
+
         Enemy enemy = CombatController.obj.selectedEnemy;
+
         if(enemy == null){
             yield break;
         }
 
         doubleAttackSuccess = false;
+        doubleAttackAttempted = false;
+        
         Attack();
 
         yield return new WaitForSeconds(0.5f);
 
         canDoubleAttack = true;
+
         doubleAttackWindowStart = Time.time;
-        doubleAttackWindowEnd = Time.time + 0.3f;
+        doubleAttackWindowEnd = Time.time + 0.4f;
+
         stateText.text = "Otra vez";
 
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.4f);
 
         canDoubleAttack = false;
+
         stateText.text = "";
 
         if(doubleAttackSuccess){
@@ -138,34 +145,34 @@ public class Player : Character
     }
     
     public void TryParry(){
-        if (!canAttemptParry){
+        if(parryAttempted)
             return;
-        }
 
-        canAttemptParry = false;
-        StartCoroutine(ParryCooldown());
+        parryAttempted = true;
 
-        if(canParry){
-            parrySuccess = true;
-        }
-    }
+        if(!canParry)
+            return;
 
-    IEnumerator ParryCooldown(){
-        yield return new WaitForSeconds(parryCooldown);
-
-        canAttemptParry = true;
+        parrySuccess = true;
     }
 
     public void TryDoubleAttack(){
-        if (!canDoubleAttack){
+        if(doubleAttackAttempted)
             return;
-        }
+
+        doubleAttackAttempted = true;
+
+        if(!canDoubleAttack)
+            return;
 
         float clickTime = Time.time;
 
         if(clickTime >= doubleAttackWindowStart && clickTime <= doubleAttackWindowEnd){
             doubleAttackSuccess = true;
+
             canDoubleAttack = false;
+
+            waitingForDoubleAttackInput = false;
         }
     }
 

@@ -18,17 +18,19 @@ public class Enemy : Character
 
     public IEnumerator AttackCoroutine(Player player){
         StartCoroutine(ShowText("Atacará", 0.5f));
+        
+        player.parryAttempted = false;
+        player.parrySuccess = false;
+        player.canParry = false;
 
-        //La ventana de Parry se abre
         yield return new WaitForSeconds(0.2f);
 
         player.canParry = true;
-        player.parrySuccess = false;
 
         yield return new WaitForSeconds(0.25f);
-        //La ventana de Parry se cierra
 
         player.canParry = false;
+
         if(player.parrySuccess){
             StartCoroutine(player.ShowText("Parry", 0.5f));
             TakeDamage(player.attack);

@@ -40,8 +40,10 @@ public class CombatController : MonoBehaviour
             yield break;
         }
 
+        //Entra cuando hay un enemigo seleccionado
         if(selectedEnemy != null){
             state = CombatState.Busy;
+            //Se invoca la función de atacar
             yield return StartCoroutine(Player.obj.AttackCoroutine());
             StartCoroutine(EnemyTurn());
         }
