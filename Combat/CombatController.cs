@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class CombatController : MonoBehaviour
 {
+    [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] private float spacingY = 2f;
+    [SerializeField] private Vector2 spawnOrigin = new Vector2(4f, 0f);
     public static CombatController obj;
     public CombatState state;
+    public int enemyCount;
     public Enemy selectedEnemy;
     private Enemy[] enemies;
 
@@ -14,8 +18,53 @@ public class CombatController : MonoBehaviour
     }
 
     void Start(){
+        enemyCount = CombatData.enemyCount;
+        SpawnEnemies();
         state = CombatState.PlayerTurn;
         enemies = FindObjectsOfType<Enemy>();
+    }
+
+    void SpawnEnemies(){
+        List<Vector2> positions = GetSpawnPositions(enemyCount);
+        foreach(Vector2 pos in positions){
+            Instantiate(enemyPrefab, pos, Quaternion.identity);
+        }
+    }
+
+    List<Vector2> GetSpawnPositions(int count){
+        List<Vector2> positions = new List<Vector2>();
+        Vector2 center = spawnOrigin;
+        float s = spacingY;
+
+        switch(count){
+            case 1:
+                // Centro
+                positions.Add(center);
+                break;
+
+            case 2:
+                // Fila diagonal "/"
+                positions.Add(center + new Vector2( 0.6f,  s * 0.7f));
+                positions.Add(center + new Vector2(-0.6f, -s * 0.7f));
+                break;
+
+            case 3:
+                // Triángulo "<|" punta a la izquierda
+                positions.Add(center + new Vector2(-s * 0.8f,  0f));     // punta izquierda
+                positions.Add(center + new Vector2( s * 0.8f,  s * 0.8f)); // arriba derecha
+                positions.Add(center + new Vector2( s * 0.8f, -s * 0.8f)); // abajo derecha
+                break;
+
+            case 4:
+                // Anillo
+                positions.Add(center + new Vector2( 0f,  s * 0.9f)); // arriba
+                positions.Add(center + new Vector2( 0f, -s * 0.9f)); // abajo
+                positions.Add(center + new Vector2( s * 0.9f,  0f)); // derecha
+                positions.Add(center + new Vector2(-s * 0.9f,  0f)); // izquierda
+                break;
+        }
+
+        return positions;
     }
 
     public void SelectEnemy(Enemy enemy){

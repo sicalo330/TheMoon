@@ -12,11 +12,8 @@ public class Player : Character
     [SerializeField]public bool isCombat = false;
     [SerializeField]public bool canParry;
     [SerializeField]public bool parrySuccess;
-    [SerializeField] private float minClickInterval = 0.1f;
     public bool canDoubleAttack = false;
-    private bool canAttemptDoubleAttack = true;
     public bool doubleAttackSuccess;
-    private bool waitingForDoubleAttackInput;
     private bool doubleAttackAttempted;
     public bool parryAttempted;
     private Camera mainCamera;
@@ -30,7 +27,9 @@ public class Player : Character
         //basePosition = transform.position;
 
         //Estos son atributos de la clase Character
-        lifeText.text = hp.ToString();
+        if(isCombat){
+            lifeText.text = hp.ToString();
+        }
     }
 
     void Update(){        
@@ -119,7 +118,7 @@ public class Player : Character
 
         doubleAttackSuccess = false;
         doubleAttackAttempted = false;
-        
+
         Attack();
 
         yield return new WaitForSeconds(0.5f);
@@ -140,7 +139,10 @@ public class Player : Character
         if(doubleAttackSuccess){
             yield return StartCoroutine(ShowText("Double", 0.5f));
 
-            enemy.TakeDamage(attack);
+            if(enemy != null){
+                enemy.TakeDamage(attack);
+            }
+            yield break;
         }
     }
     
@@ -171,14 +173,11 @@ public class Player : Character
             doubleAttackSuccess = true;
 
             canDoubleAttack = false;
-
-            waitingForDoubleAttackInput = false;
         }
     }
 
     IEnumerator DoubleAttackCooldown(float time){
         yield return new WaitForSeconds(time);
-        canAttemptDoubleAttack = true;
     }
 
 }
