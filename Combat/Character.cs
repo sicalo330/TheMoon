@@ -10,7 +10,7 @@ public class Character : MonoBehaviour
     //[SerializeField]public int maxHp;
     [SerializeField]public int attack;
     [SerializeField]public bool isPlayer;
-    [SerializeField] protected TMP_Text stateText;
+    [SerializeField] public TMP_Text stateText;
     [SerializeField] protected TMP_Text lifeText;
 
     void Start(){
@@ -30,11 +30,19 @@ public class Character : MonoBehaviour
         StartCoroutine(TakeDamageAnimation());
 
         if(hp <= 0){
-            StartCoroutine(Wait());
+            Player.obj.OutParameter("playerAttack");
+            FakeEnemy.obj.OutParameter("playerAttack");
+            Player.obj.enemyDied = true;
+            CombatController.obj.enemyAlive--;
+            CombatController.obj.backGroundAttack.SetActive(false);//Tengo que poner esto sí o sí
+            Die();
         }
     }
 
     public virtual void Die(){
+        if(CombatController.obj.selectedEnemy == this){
+            CombatController.obj.selectedEnemy = null;
+        }
         Destroy(gameObject);
     }
 
@@ -43,6 +51,8 @@ public class Character : MonoBehaviour
         Player.obj.OutParameter("playerAttack");
         FakeEnemy.obj.OutParameter("playerAttack");
         Player.obj.enemyDied = true; // avisa que murió
+        CombatController.obj.buttonAtack.SetActive(false);
+        CombatController.obj.enemyAlive--;
         Die();
     }
 

@@ -35,7 +35,7 @@ public class Player : Character
     }
 
     void Update(){        
-        //Ataque y doble ataque 
+        //Ataque
         if(Input.GetMouseButtonDown(0) && isCombat){
                 TryParry();
         }
@@ -125,17 +125,15 @@ public class Player : Character
         CombatController.obj.backGroundAttack.SetActive(true);
 
         //Attack();
-        StartCoroutine(Attack());
+        yield return StartCoroutine(Attack());
 
-        CombatController.obj.backGroundAttack.SetActive(false);
 
-        while(enemy != null){
-            CombatController.obj.backGroundAttack.SetActive(true);
+        while(CombatController.obj.selectedEnemy != null){
             // Resetea al inicio del tiempo muerto
             hitSuccess = false;
             doubleAttackAttempted = false;
 
-            yield return new WaitForSeconds(0.5f); // tiempo muerto, clicks aquí marcan doubleAttackAttempted = true con canDoubleAttack = false
+            yield return new WaitForSeconds(0.2f);
 
             canDoubleAttack = true;
             stateText.text = "Otra vez";
@@ -144,7 +142,6 @@ public class Player : Character
 
             canDoubleAttack = false;
             stateText.text = "";
-            CombatController.obj.backGroundAttack.SetActive(false);
 
             if(hitSuccess){
                 //Repite la animación de ataque
@@ -152,17 +149,21 @@ public class Player : Character
                 animator.Play("Attack", 0, 0f);
                 yield return StartCoroutine(ShowText("Hit!", 0.3f));
                 if(enemy != null){
-                    Debug.Log("Enemigo vivirá");
                     enemy.TakeDamage(attack);
                     StartCoroutine(CameraShake.obj.Shake());
                 }
+
                 if(enemy == null || enemyDied){
-                    Debug.Log("Enemigo morirá");
                     enemyDied = false;
+
+                    OutParameter("playerAttack");
+                    FakeEnemy.obj.OutParameter("playerAttack");
                     CombatController.obj.backGroundAttack.SetActive(false);
-                    //FakeEnemy.obj.animator.Play("FakeEnemyTakeDamage", 0, 0f);
+
                     yield return new WaitForSeconds(0.2f);
+
                     lifeText.text = hp.ToString();
+
                     yield break;
                 }
             }else {//Se entra al else cuando falla el ataque consecutivo
@@ -186,6 +187,7 @@ public class Player : Character
         if(parryAttempted)
             return;
 
+        //Reinicia el parryAttemped para futuros ataques
         parryAttempted = true;
 
         if(!canParry)

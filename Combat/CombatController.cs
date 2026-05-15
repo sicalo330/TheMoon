@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 public class CombatController : MonoBehaviour
@@ -7,13 +9,16 @@ public class CombatController : MonoBehaviour
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] public GameObject buttonAtack;
     [SerializeField] public GameObject backGroundAttack;
+    [SerializeField] private GameObject containerAdvice;
+    [SerializeField] private TMP_Text textAdvice;
     [SerializeField] private float spacingY = 2f;
     [SerializeField] private float buttonOffsetX;
     [SerializeField] private float buttonOffsetY;
     [SerializeField] private Vector2 spawnOrigin = new Vector2(4f, 0f);
     public static CombatController obj;
     public CombatState state;
-    public int enemyCount = 3;
+    public int enemyCount = 0;
+    public int enemyAlive = 0;
     public Enemy selectedEnemy;
     private Enemy[] enemies;
 
@@ -22,17 +27,33 @@ public class CombatController : MonoBehaviour
     }
 
     void Start(){
-        enemyCount = CombatData.enemyCount;
-        enemyCount = 3;
+        //ESta variable es importante porque dicta cuántos enemigos van a haber en pantalla
+        enemyCount = 1;
         SpawnEnemies();
         state = CombatState.PlayerTurn;
         enemies = FindObjectsOfType<Enemy>();
+        enemyAlive = enemies.Length;
     }
 
     void SpawnEnemies(){
         List<Vector2> positions = GetSpawnPositions(enemyCount);
         foreach(Vector2 pos in positions){
             Instantiate(enemyPrefab, pos, Quaternion.identity);
+        }
+    }
+
+    public void CheckWaveCompletion(){
+        if(enemyAlive <= 0 && enemyCount < 4){
+            enemyCount++;
+            SpawnEnemies();
+            enemyAlive = enemyCount;
+            enemies = FindObjectsOfType<Enemy>();
+            state = CombatState.PlayerTurn;
+            Player.obj.select.SetActive(true);
+            buttonAtack.SetActive(false);
+        }
+        else if(enemyAlive <= 0 && enemyCount >= 4){
+            Debug.Log("¡Combate ganado!");
         }
     }
 
@@ -88,57 +109,72 @@ public class CombatController : MonoBehaviour
 
     //Ataque del jugador durante su turno
     public void PlayerAttack(){
-        backGroundAttack.SetActive(true);
         StartCoroutine(PlayerAttackCoroutine());
-        backGroundAttack.SetActive(false);
     }
 
     IEnumerator PlayerAttackCoroutine(){
-        if(state != CombatState.PlayerTurn){
-            yield break;
-        }
+        if(state != CombatState.PlayerTurn) yield break;
 
-        //Entra cuando hay un enemigo seleccionado
         if(selectedEnemy != null){
             state = CombatState.Busy;
-            //Se invoca la función de atacar
             yield return StartCoroutine(Player.obj.AttackCoroutine());
-            StartCoroutine(EnemyTurn());
+
+            if(enemyAlive <= 0){
+                CheckWaveCompletion();
+            }
+            else{
+                yield return StartCoroutine(EnemyTurn());
+            }
         }
     }
 
     //Acciones del enemigo durante su turno
     IEnumerator EnemyTurn(){
         buttonAtack.SetActive(false);
-        Player.obj.select.SetActive(false); // apaga flecha del jugador
+        Player.obj.select.SetActive(false);
 
         yield return new WaitForSeconds(1f);
         state = CombatState.EnemyTurn;
 
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
-            if(enemy != null){
-                enemy.SetTurnIndicator(true); // flecha del enemigo que va a atacar
-                backGroundAttack.SetActive(true);
-                StartCoroutine(CameraShake.obj.Shake());
+            if(!enemy) continue;
 
-                //Empieza animación de enemigo ataca a jugador
-                Player.obj.SetParameter("enemyAttack");
-                FakeEnemy.obj.SetParameter("enemyAttack");
+            textAdvice.text = "Venga papi que no e pa' eso";
+            containerAdvice.SetActive(true);
+            
+            if(!enemy) continue;
+            enemy.SetTurnIndicator(true);
 
-                yield return StartCoroutine(enemy.AttackCoroutine(Player.obj));
-                yield return new WaitForSeconds(0.4f);
+            yield return new WaitForSeconds(1f);
 
-                FakeEnemy.obj.OutParameter("enemyAttack");
-                Player.obj.OutParameter("enemyAttack");
-                
-                backGroundAttack.SetActive(false);
-                enemy.SetTurnIndicator(false); // apaga al terminar
-                yield return new WaitForSeconds(1.2f);
+            containerAdvice.SetActive(false);
+            backGroundAttack.SetActive(true);
+            StartCoroutine(CameraShake.obj.Shake());
+
+            Player.obj.SetParameter("enemyAttack");
+            FakeEnemy.obj.SetParameter("enemyAttack");
+
+            yield return StartCoroutine(enemy.AttackCoroutine(Player.obj));
+            yield return new WaitForSeconds(0.4f);
+
+            FakeEnemy.obj.OutParameter("enemyAttack");
+            Player.obj.OutParameter("enemyAttack");
+            backGroundAttack.SetActive(false);
+            
+            //ESte if es para ver si el enemigo sigue vivo después de un parry
+            if(enemy){
+                enemy.SetTurnIndicator(false);
             }
+
+            yield return new WaitForSeconds(1.2f);
         }
 
-        Player.obj.select.SetActive(true); // devuelve flecha al jugador
+        //La línea de abajo indica turno del jugador
+        Player.obj.select.SetActive(true);
+        Player.obj.stateText.text = "";
         state = CombatState.PlayerTurn;
+        
+        CheckWaveCompletion();
     }
 
 }
