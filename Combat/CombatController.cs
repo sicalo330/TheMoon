@@ -5,11 +5,14 @@ using UnityEngine;
 public class CombatController : MonoBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
+    [SerializeField] public GameObject buttonAtack;
     [SerializeField] private float spacingY = 2f;
+    [SerializeField] private float buttonOffsetX;
+    [SerializeField] private float buttonOffsetY;
     [SerializeField] private Vector2 spawnOrigin = new Vector2(4f, 0f);
     public static CombatController obj;
     public CombatState state;
-    public int enemyCount;
+    public int enemyCount = 3;
     public Enemy selectedEnemy;
     private Enemy[] enemies;
 
@@ -19,6 +22,7 @@ public class CombatController : MonoBehaviour
 
     void Start(){
         enemyCount = CombatData.enemyCount;
+        enemyCount = 3;
         SpawnEnemies();
         state = CombatState.PlayerTurn;
         enemies = FindObjectsOfType<Enemy>();
@@ -67,17 +71,18 @@ public class CombatController : MonoBehaviour
         return positions;
     }
 
+    //Función para selccionar un enemigo
     public void SelectEnemy(Enemy enemy){
-        if(state != CombatState.PlayerTurn){
-            return;
-        }
-
-        if(selectedEnemy != null){
-            selectedEnemy.Select(false);
-        }
+        if(state != CombatState.PlayerTurn) return;
 
         selectedEnemy = enemy;
-        selectedEnemy.Select(true);
+
+        buttonAtack.transform.position = new Vector3(
+            enemy.transform.position.x - buttonOffsetX,
+            enemy.transform.position.y,
+            enemy.transform.position.z
+        );
+        buttonAtack.SetActive(true);
     }
 
     public void PlayerAttack(){
@@ -98,20 +103,25 @@ public class CombatController : MonoBehaviour
         }
     }
 
-
+    //Acciones del enemigo durante su turno
     IEnumerator EnemyTurn(){
-        
-        yield return new WaitForSeconds(1f);
+        buttonAtack.SetActive(false);
+        Player.obj.select.SetActive(false); // apaga flecha del jugador
 
+        yield return new WaitForSeconds(1f);
         state = CombatState.EnemyTurn;
+
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
             if(enemy != null){
+                enemy.SetTurnIndicator(true); // flecha del enemigo que va a atacar
                 yield return StartCoroutine(enemy.AttackCoroutine(Player.obj));
+                enemy.SetTurnIndicator(false); // apaga al terminar
                 yield return new WaitForSeconds(1.2f);
             }
         }
+
+        Player.obj.select.SetActive(true); // devuelve flecha al jugador
         state = CombatState.PlayerTurn;
     }
-
 
 }

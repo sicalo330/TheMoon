@@ -7,6 +7,7 @@ public class Enemy : Character
 {
     //Enemy hará dañoa Player, recordar que este último existe en las escenas para los combates
     public void Attack(Player player){
+        select.SetActive(false);
         player.TakeDamage(attack);
     }
 

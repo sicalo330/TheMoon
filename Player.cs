@@ -16,29 +16,27 @@ public class Player : Character
     public bool doubleAttackSuccess;
     private bool doubleAttackAttempted;
     public bool parryAttempted;
+    public bool hitSuccess = false;
     private Camera mainCamera;
     public string lastSpawnPoint = "MainGame";
     private float lastClickTime;
     private float doubleAttackWindowStart;
     private float doubleAttackWindowEnd;
+    Animator animator;
 
     void Start(){
+        animator = GetComponent<Animator>();
         mainCamera = Camera.main;
-        //basePosition = transform.position;
-
-        //Estos son atributos de la clase Character
         if(isCombat){
             lifeText.text = hp.ToString();
+            select.SetActive(true); // jugador comienza primero
         }
     }
 
     void Update(){        
         //Ataque y doble ataque 
         if(Input.GetMouseButtonDown(0) && isCombat){
-            if(isCombat){
                 TryParry();
-                TryDoubleAttack();
-            }
         }
         
         //Movimiento del personaje
@@ -104,45 +102,39 @@ public class Player : Character
 
     public void Attack(){
             if(CombatController.obj.selectedEnemy != null){
+                animator.SetBool("attack", true);
                 CombatController.obj.selectedEnemy.TakeDamage(attack);
             }
         }
 
     public IEnumerator AttackCoroutine(){
-
         Enemy enemy = CombatController.obj.selectedEnemy;
-
-        if(enemy == null){
-            yield break;
-        }
-
-        doubleAttackSuccess = false;
-        doubleAttackAttempted = false;
+        if(enemy == null) yield break;
 
         Attack();
 
-        yield return new WaitForSeconds(0.5f);
+        while(enemy != null){
+            // Resetea al inicio del tiempo muerto
+            hitSuccess = false;
+            doubleAttackAttempted = false;
 
-        canDoubleAttack = true;
+            yield return new WaitForSeconds(0.5f); // tiempo muerto, clicks aquí marcan doubleAttackAttempted = true con canDoubleAttack = false
 
-        doubleAttackWindowStart = Time.time;
-        doubleAttackWindowEnd = Time.time + 0.4f;
+            canDoubleAttack = true;
+            stateText.text = "Otra vez";
 
-        stateText.text = "Otra vez";
+            yield return new WaitForSeconds(0.4f);
 
-        yield return new WaitForSeconds(0.4f);
+            canDoubleAttack = false;
+            stateText.text = "";
 
-        canDoubleAttack = false;
-
-        stateText.text = "";
-
-        if(doubleAttackSuccess){
-            yield return StartCoroutine(ShowText("Double", 0.5f));
-
-            if(enemy != null){
-                enemy.TakeDamage(attack);
+            if(hitSuccess){
+                yield return StartCoroutine(ShowText("Hit!", 0.3f));
+                if(enemy != null) enemy.TakeDamage(attack);
+                if(enemy == null) yield break;
+            } else {
+                yield break;
             }
-            yield break;
         }
     }
     
@@ -167,13 +159,8 @@ public class Player : Character
         if(!canDoubleAttack)
             return;
 
-        float clickTime = Time.time;
-
-        if(clickTime >= doubleAttackWindowStart && clickTime <= doubleAttackWindowEnd){
-            doubleAttackSuccess = true;
-
-            canDoubleAttack = false;
-        }
+        hitSuccess = true;
+        canDoubleAttack = false;
     }
 
     IEnumerator DoubleAttackCooldown(float time){

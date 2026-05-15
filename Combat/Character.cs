@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
-    public GameObject select;
+    [SerializeField]public GameObject select;
     [SerializeField]public int hp;
     //[SerializeField]public int maxHp;
     [SerializeField]public int attack;
@@ -17,8 +17,8 @@ public class Character : MonoBehaviour
         lifeText.text = hp.ToString();
     }
 
-    public void Select(bool select){
-        this.select.SetActive(select);
+    public void SetTurnIndicator(bool active){
+        select.SetActive(active);
     }
 
     //TakeDamage no es atacar a alguien, es solo recibir daño, el ataque lo debe personalizar Player y los enemigos
