@@ -16,11 +16,11 @@ public class FakeEnemy : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    public void StartAnimation(string parameter){
+    public void SetParameter(string parameter){
         animator.SetBool(parameter, true);
     }
 
-    public void StopAnimation(string parameter){
+    public void OutParameter(string parameter){
         animator.SetBool(parameter, false);
     }
 }

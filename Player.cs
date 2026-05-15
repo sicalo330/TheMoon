@@ -17,6 +17,7 @@ public class Player : Character
     private bool doubleAttackAttempted;
     public bool parryAttempted;
     public bool hitSuccess = false;
+    public bool enemyDied = false;
     private Camera mainCamera;
     public string lastSpawnPoint = "MainGame";
     private float lastClickTime;
@@ -100,8 +101,10 @@ public class Player : Character
 
     //------------------Escena combate----------------------
 
-    public void Attack(){
+    public IEnumerator Attack(){
             if(CombatController.obj.selectedEnemy != null){
+                yield return new WaitForSeconds(0.6f);
+                //ESta línea le quita el hp al enemigo, es solo eta
                 CombatController.obj.selectedEnemy.TakeDamage(attack);
             }
         }
@@ -110,17 +113,19 @@ public class Player : Character
         //Comienza el ataque
         select.SetActive(false);
         lifeText.text = "";//Por alguna razon está cosa se ponía fea en las animaciones, entonces me tocó quitarlo
-        StartAnimation("playerAttack");
+        //Player empieza su animación de ataque y enemigo de atacado
+        SetParameter("playerAttack");
+        FakeEnemy.obj.SetParameter("playerAttack");
+
         Enemy enemy = CombatController.obj.selectedEnemy;
         //Aquí empieza la animación del enemigo cuando el jugador ataca al enemigo
-        FakeEnemy.obj.StartAnimation("playerAttack");
         if(enemy == null) yield break;
 
         StartCoroutine(CameraShake.obj.Shake());
         CombatController.obj.backGroundAttack.SetActive(true);
-        Attack();
 
-        yield return new WaitForSeconds(0.3f);
+        //Attack();
+        StartCoroutine(Attack());
 
         CombatController.obj.backGroundAttack.SetActive(false);
 
@@ -142,22 +147,30 @@ public class Player : Character
             CombatController.obj.backGroundAttack.SetActive(false);
 
             if(hitSuccess){
-                //animator.SetBool("again", true);
-                animator.Play("Attack", 0, 0f);
+                //Repite la animación de ataque
                 FakeEnemy.obj.animator.Play("FakeEnemyTakeDamage", 0, 0f);
-
+                animator.Play("Attack", 0, 0f);
                 yield return StartCoroutine(ShowText("Hit!", 0.3f));
-                CombatController.obj.backGroundAttack.SetActive(true);
-                if(enemy != null) enemy.TakeDamage(attack);
-                StartCoroutine(CameraShake.obj.Shake());
-                CombatController.obj.backGroundAttack.SetActive(false);
-                if(enemy == null) yield break;
-            } else {//Se entra al else cuando falla el ataque consecutivo
+                if(enemy != null){
+                    Debug.Log("Enemigo vivirá");
+                    enemy.TakeDamage(attack);
+                    StartCoroutine(CameraShake.obj.Shake());
+                }
+                if(enemy == null || enemyDied){
+                    Debug.Log("Enemigo morirá");
+                    enemyDied = false;
+                    CombatController.obj.backGroundAttack.SetActive(false);
+                    //FakeEnemy.obj.animator.Play("FakeEnemyTakeDamage", 0, 0f);
+                    yield return new WaitForSeconds(0.2f);
+                    lifeText.text = hp.ToString();
+                    yield break;
+                }
+            }else {//Se entra al else cuando falla el ataque consecutivo
                 CombatController.obj.backGroundAttack.SetActive(false);
                 //Hace la animación de regreso
                 //animator.SetBool("again", false);
-                StopAnimation("playerAttack");
-                FakeEnemy.obj.StopAnimation("playerAttack");
+                OutParameter("playerAttack");
+                FakeEnemy.obj.OutParameter("playerAttack");
 
                 yield return new WaitForSeconds(0.2f);
 
@@ -198,11 +211,11 @@ public class Player : Character
         yield return new WaitForSeconds(time);
     }
 
-    public void StartAnimation(string parameter){
+    public void SetParameter(string parameter){
         animator.SetBool(parameter, true);
     }
 
-    public void StopAnimation(string parameter){
+    public void OutParameter(string parameter){
         animator.SetBool(parameter, false);
     }
 

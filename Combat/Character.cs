@@ -25,16 +25,25 @@ public class Character : MonoBehaviour
     public virtual void TakeDamage(int damage){
         hp -= damage;
         lifeText.text = hp.ToString();
+        stateText.text = "Impacto";
+
         StartCoroutine(TakeDamageAnimation());
 
-        if(hp <= 0)
-        {
-            Die();
+        if(hp <= 0){
+            StartCoroutine(Wait());
         }
     }
 
     public virtual void Die(){
         Destroy(gameObject);
+    }
+
+    public IEnumerator Wait(){
+        yield return new WaitForSecondsRealtime(0.6f);
+        Player.obj.OutParameter("playerAttack");
+        FakeEnemy.obj.OutParameter("playerAttack");
+        Player.obj.enemyDied = true; // avisa que murió
+        Die();
     }
 
     IEnumerator TakeDamageAnimation(){
