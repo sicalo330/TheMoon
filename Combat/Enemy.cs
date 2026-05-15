@@ -17,6 +17,7 @@ public class Enemy : Character
         CombatController.obj.SelectEnemy(this);
     }
 
+    //Este es la función que usa el enemigo para atacar al jugador
     public IEnumerator AttackCoroutine(Player player){
         player.parryAttempted = false;
         player.parrySuccess = false;

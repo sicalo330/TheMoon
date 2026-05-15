@@ -119,7 +119,18 @@ public class CombatController : MonoBehaviour
             if(enemy != null){
                 enemy.SetTurnIndicator(true); // flecha del enemigo que va a atacar
                 backGroundAttack.SetActive(true);
+                StartCoroutine(CameraShake.obj.Shake());
+
+                //Empieza animación de enemigo ataca a jugador
+                Player.obj.StartAnimation("enemyAttack");
+                FakeEnemy.obj.StartAnimation("enemyAttack");
+
                 yield return StartCoroutine(enemy.AttackCoroutine(Player.obj));
+                yield return new WaitForSeconds(0.4f);
+
+                FakeEnemy.obj.StopAnimation("enemyAttack");
+                Player.obj.StopAnimation("enemyAttack");
+                
                 backGroundAttack.SetActive(false);
                 enemy.SetTurnIndicator(false); // apaga al terminar
                 yield return new WaitForSeconds(1.2f);
