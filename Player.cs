@@ -22,7 +22,7 @@ public class Player : Character
     private float lastClickTime;
     private float doubleAttackWindowStart;
     private float doubleAttackWindowEnd;
-    Animator animator;
+    public Animator animator;
 
     void Start(){
         animator = GetComponent<Animator>();
@@ -102,18 +102,28 @@ public class Player : Character
 
     public void Attack(){
             if(CombatController.obj.selectedEnemy != null){
-                animator.SetBool("attack", true);
                 CombatController.obj.selectedEnemy.TakeDamage(attack);
             }
         }
 
     public IEnumerator AttackCoroutine(){
+        //Comienza el ataque
+        select.SetActive(false);
+        lifeText.text = "";//Por alguna razon está cosa se ponía fea en las animaciones, entonces me tocó quitarlo
+        animator.SetBool("attack", true);
         Enemy enemy = CombatController.obj.selectedEnemy;
+        FakeEnemy.obj.StartAnimation();
         if(enemy == null) yield break;
 
+        CombatController.obj.backGroundAttack.SetActive(true);
         Attack();
 
+        yield return new WaitForSeconds(0.3f);
+
+        CombatController.obj.backGroundAttack.SetActive(false);
+
         while(enemy != null){
+            CombatController.obj.backGroundAttack.SetActive(true);
             // Resetea al inicio del tiempo muerto
             hitSuccess = false;
             doubleAttackAttempted = false;
@@ -127,12 +137,29 @@ public class Player : Character
 
             canDoubleAttack = false;
             stateText.text = "";
+            CombatController.obj.backGroundAttack.SetActive(false);
 
             if(hitSuccess){
+                //animator.SetBool("again", true);
+                animator.Play("Attack", 0, 0f);
+                FakeEnemy.obj.animator.Play("FakeEnemyTakeDamage", 0, 0f);
                 yield return StartCoroutine(ShowText("Hit!", 0.3f));
+                CombatController.obj.backGroundAttack.SetActive(true);
                 if(enemy != null) enemy.TakeDamage(attack);
+                CombatController.obj.backGroundAttack.SetActive(false);
                 if(enemy == null) yield break;
-            } else {
+            } else {//Se entra al else cuando falla el ataque consecutivo
+                CombatController.obj.backGroundAttack.SetActive(false);
+                //Hace la animación de regreso
+                //animator.SetBool("again", false);
+                animator.SetBool("attack", false);
+                FakeEnemy.obj.StopAnimation();
+
+                yield return new WaitForSeconds(0.2f);
+
+                //Vuelve a idle
+                //select.SetActive(true);//Devuelve la marca
+                lifeText.text = hp.ToString();//Devuelve el texto de la vida
                 yield break;
             }
         }

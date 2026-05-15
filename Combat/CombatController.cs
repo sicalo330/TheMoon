@@ -6,6 +6,7 @@ public class CombatController : MonoBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] public GameObject buttonAtack;
+    [SerializeField] public GameObject backGroundAttack;
     [SerializeField] private float spacingY = 2f;
     [SerializeField] private float buttonOffsetX;
     [SerializeField] private float buttonOffsetY;
@@ -85,8 +86,11 @@ public class CombatController : MonoBehaviour
         buttonAtack.SetActive(true);
     }
 
+    //Ataque del jugador durante su turno
     public void PlayerAttack(){
+        backGroundAttack.SetActive(true);
         StartCoroutine(PlayerAttackCoroutine());
+        backGroundAttack.SetActive(false);
     }
 
     IEnumerator PlayerAttackCoroutine(){
@@ -114,7 +118,9 @@ public class CombatController : MonoBehaviour
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
             if(enemy != null){
                 enemy.SetTurnIndicator(true); // flecha del enemigo que va a atacar
+                backGroundAttack.SetActive(true);
                 yield return StartCoroutine(enemy.AttackCoroutine(Player.obj));
+                backGroundAttack.SetActive(false);
                 enemy.SetTurnIndicator(false); // apaga al terminar
                 yield return new WaitForSeconds(1.2f);
             }

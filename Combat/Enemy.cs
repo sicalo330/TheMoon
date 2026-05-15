@@ -18,8 +18,6 @@ public class Enemy : Character
     }
 
     public IEnumerator AttackCoroutine(Player player){
-        StartCoroutine(ShowText("Atacará", 0.5f));
-        
         player.parryAttempted = false;
         player.parrySuccess = false;
         player.canParry = false;
