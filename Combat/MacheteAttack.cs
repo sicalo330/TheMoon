@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class Button : MonoBehaviour
+public class MacheteAttack : MonoBehaviour
 {
     private void OnMouseDown(){
         Player.obj.TryDoubleAttack();

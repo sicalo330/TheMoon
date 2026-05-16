@@ -150,7 +150,7 @@ public class Player : Character
             if(hitSuccess){
                 //Repite la animación de ataque
                 FakeEnemy.obj.animator.Play("FakeEnemyTakeDamage", 0, 0f);
-                animator.Play("Attack", 0, 0f);
+                animator.Play("GunAttack", 0, 0f);
                 yield return StartCoroutine(ShowText("Hit!", 0.3f));
                 if(enemy != null){
                     enemy.TakeDamage(attack);
@@ -223,6 +223,31 @@ public class Player : Character
 
     public void OutParameter(string parameter){
         animator.SetBool(parameter, false);
+    }
+
+    public IEnumerator GunAttackCoroutine(){
+        select.SetActive(false);
+        lifeText.text = "";
+        SetParameter("playerAttack");
+        FakeEnemy.obj.SetParameter("playerAttack");
+
+        CombatController.obj.backGroundAttack.SetActive(true);
+        StartCoroutine(CameraShake.obj.Shake());
+
+        yield return new WaitForSeconds(0.6f); // espera al frame del disparo
+
+        // Daña a todos los enemigos
+        foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
+            if(enemy) enemy.TakeDamage(attack);
+        }
+
+        yield return new WaitForSeconds(0.3f);
+
+        CombatController.obj.backGroundAttack.SetActive(false);
+        OutParameter("playerAttack");
+        FakeEnemy.obj.OutParameter("playerAttack");
+
+        lifeText.text = hp.ToString();
     }
 
 }

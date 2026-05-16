@@ -8,6 +8,7 @@ public class CombatController : MonoBehaviour
 {
     [SerializeField] private GameObject enemyPrefab;
     [SerializeField] public GameObject buttonAtack;
+    [SerializeField] public GameObject buttonAtackGun;
     [SerializeField] public GameObject backGroundAttack;
     [SerializeField] private GameObject containerAdvice;
     [SerializeField] private TMP_Text textAdvice;
@@ -33,6 +34,16 @@ public class CombatController : MonoBehaviour
         state = CombatState.PlayerTurn;
         enemies = FindObjectsOfType<Enemy>();
         enemyAlive = enemies.Length;
+        PutGun();
+    }
+
+    void PutGun(){
+        buttonAtackGun.transform.position = new Vector3(
+            Player.obj.transform.position.x - buttonOffsetX,
+            Player.obj.transform.position.y,
+            0f
+        );
+        buttonAtackGun.SetActive(true);
     }
 
     void SpawnEnemies(){
@@ -171,10 +182,31 @@ public class CombatController : MonoBehaviour
 
         //La línea de abajo indica turno del jugador
         Player.obj.select.SetActive(true);
+        buttonAtackGun.SetActive(true);
         Player.obj.stateText.text = "";
         state = CombatState.PlayerTurn;
         
         CheckWaveCompletion();
+    }
+
+    public void PlayerGunAttack(){
+        StartCoroutine(PlayerGunAttackCoroutine());
+    }
+
+    IEnumerator PlayerGunAttackCoroutine(){
+        if(state != CombatState.PlayerTurn) yield break;
+
+        state = CombatState.Busy;
+        buttonAtackGun.SetActive(false);
+        buttonAtack.SetActive(false);
+
+        yield return StartCoroutine(Player.obj.GunAttackCoroutine());
+
+        if(enemyAlive <= 0){
+            CheckWaveCompletion();
+        } else {
+            yield return StartCoroutine(EnemyTurn());
+        }
     }
 
 }
