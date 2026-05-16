@@ -62,6 +62,7 @@ public class CombatController : MonoBehaviour
             state = CombatState.PlayerTurn;
             Player.obj.select.SetActive(true);
             buttonAtack.SetActive(false);
+            buttonAtackGun.SetActive(true);
         }
         else if(enemyAlive <= 0 && enemyCount >= 4){
             Debug.Log("¡Combate ganado!");
@@ -128,6 +129,7 @@ public class CombatController : MonoBehaviour
 
         if(selectedEnemy != null){
             state = CombatState.Busy;
+            StartCoroutine(CameraShake.obj.Shake());
             yield return StartCoroutine(Player.obj.AttackCoroutine());
 
             if(enemyAlive <= 0){
@@ -201,6 +203,8 @@ public class CombatController : MonoBehaviour
         buttonAtack.SetActive(false);
 
         yield return StartCoroutine(Player.obj.GunAttackCoroutine());
+
+        yield return new WaitForSeconds(0.9f);
 
         if(enemyAlive <= 0){
             CheckWaveCompletion();

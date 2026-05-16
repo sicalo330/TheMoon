@@ -14,7 +14,7 @@ public class SpawnCombat : MonoBehaviour
 
             //Solo hace que el texto de la vida aparezca cuando cambia de juego a combate
             CombatData.enemyCount = enemyCount;
-            player.isCombat = true;
+            //player.isCombat = true;
             player.lastSpawnPoint = "Combat";
             SceneManager.LoadScene("Combat");
         }

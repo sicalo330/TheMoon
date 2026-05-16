@@ -7,9 +7,9 @@ using UnityEngine;
 public class Player : Character
 {
     public static Player obj;
-    [SerializeField]private float maxSpeed = 10f;
+    //[SerializeField]private float maxSpeed = 10f;
     [SerializeField]private float minY;
-    [SerializeField]public bool isCombat = false;
+    //[SerializeField]public bool isCombat = false;
     [SerializeField]public bool canParry;
     [SerializeField]public bool parrySuccess;
     [SerializeField]public GameObject clickAdvice;
@@ -19,6 +19,8 @@ public class Player : Character
     public bool parryAttempted;
     public bool hitSuccess = false;
     public bool enemyDied = false;
+    public bool machetazo = false;
+    public bool gun = false;
     private Camera mainCamera;
     public string lastSpawnPoint = "MainGame";
     private float lastClickTime;
@@ -29,42 +31,46 @@ public class Player : Character
     void Start(){
         animator = GetComponent<Animator>();
         mainCamera = Camera.main;
-        if(isCombat){
-            lifeText.text = hp.ToString();
+        lifeText.text = hp.ToString();
             select.SetActive(true); // jugador comienza primero
-        }
     }
 
     void Update(){        
         //Ataque
-        if(Input.GetMouseButtonDown(0) && isCombat){
+        if(Input.GetMouseButtonDown(0)){
                 TryParry();
                 TryDoubleAttack();
         }
         
         //Movimiento del personaje
+        /*
+        
         if (Input.GetMouseButton(0) && !isCombat){
             FollowMousePositionDelayed(maxSpeed);
         }
+        */
     }
 
     void Awake(){
         if (obj == null){
             obj = this;
-            DontDestroyOnLoad(gameObject);
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            //DontDestroyOnLoad(gameObject);
+            //SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else{
             Destroy(gameObject);
         }
     }
 
+    /*
     private void FollowMousePositionDelayed(float maxSpeed){
         Vector2 targetPos = GetWorldPositionFromMouse();
         //targetPos.y = Mathf.Clamp(targetPos.y, minY, maxY);
         targetPos.y = transform.position.y;
         transform.position = Vector2.MoveTowards(transform.position,targetPos,maxSpeed * Time.deltaTime);
     }
+    
+    */
 
     private Vector2 GetWorldPositionFromMouse(){
         //Cuando haya un cambio de escena, hay que volver a buscar la camara
@@ -75,6 +81,7 @@ public class Player : Character
         return mainCamera.ScreenToWorldPoint(Input.mousePosition);
     }
 
+    /*
     void OnSceneLoaded(Scene scene, LoadSceneMode mode){
 
         SpawnPoint[] spawnPoints = FindObjectsOfType<SpawnPoint>();
@@ -99,6 +106,9 @@ public class Player : Character
     void OnDestroy(){
         SceneManager.sceneLoaded -= OnSceneLoaded; // Evitar duplicados
     }
+    
+    
+    */
 
 
     //------------------Escena combate----------------------
@@ -115,15 +125,23 @@ public class Player : Character
         //Comienza el ataque
         select.SetActive(false);
         lifeText.text = "";//Por alguna razon está cosa se ponía fea en las animaciones, entonces me tocó quitarlo
+
         //Player empieza su animación de ataque y enemigo de atacado
-        SetParameter("playerAttack");
+        if (gun){
+            SetParameter("playerAttack");
+        }
+
+        if (machetazo){
+            SetParameter("machetazo");
+        }
+
         FakeEnemy.obj.SetParameter("playerAttack");
 
         Enemy enemy = CombatController.obj.selectedEnemy;
         //Aquí empieza la animación del enemigo cuando el jugador ataca al enemigo
         if(enemy == null) yield break;
 
-        StartCoroutine(CameraShake.obj.Shake());
+        //StartCoroutine(CameraShake.obj.Shake());
         CombatController.obj.backGroundAttack.SetActive(true);
 
         //Attack();
@@ -137,8 +155,8 @@ public class Player : Character
 
             yield return new WaitForSeconds(0.2f);
 
-            canDoubleAttack = true;
             clickAdvice.SetActive(true);
+            canDoubleAttack = true;
             //stateText.text = "Otra vez";
 
             yield return new WaitForSeconds(0.4f);
@@ -151,15 +169,18 @@ public class Player : Character
                 //Repite la animación de ataque
                 FakeEnemy.obj.animator.Play("FakeEnemyTakeDamage", 0, 0f);
                 animator.Play("GunAttack", 0, 0f);
-                yield return StartCoroutine(ShowText("Hit!", 0.3f));
+                yield return StartCoroutine(ShowText("EPA!", 0.3f));
                 if(enemy != null){
                     enemy.TakeDamage(attack);
                     StartCoroutine(CameraShake.obj.Shake());
                 }
 
                 if(enemy == null || enemyDied){
+                    machetazo = false;
+                    gun = false;
                     enemyDied = false;
 
+                    OutParameter("machetazo");
                     OutParameter("playerAttack");
                     FakeEnemy.obj.OutParameter("playerAttack");
                     CombatController.obj.backGroundAttack.SetActive(false);
@@ -174,6 +195,9 @@ public class Player : Character
                 CombatController.obj.backGroundAttack.SetActive(false);
                 //Hace la animación de regreso
                 //animator.SetBool("again", false);
+                machetazo = false;
+                gun = false;
+                OutParameter("machetazo");
                 OutParameter("playerAttack");
                 FakeEnemy.obj.OutParameter("playerAttack");
 
@@ -230,11 +254,12 @@ public class Player : Character
         lifeText.text = "";
         SetParameter("playerAttack");
         FakeEnemy.obj.SetParameter("playerAttack");
+        
 
         CombatController.obj.backGroundAttack.SetActive(true);
-        StartCoroutine(CameraShake.obj.Shake());
 
         yield return new WaitForSeconds(0.6f); // espera al frame del disparo
+        StartCoroutine(CameraShake.obj.Shake());
 
         // Daña a todos los enemigos
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
@@ -246,7 +271,8 @@ public class Player : Character
         CombatController.obj.backGroundAttack.SetActive(false);
         OutParameter("playerAttack");
         FakeEnemy.obj.OutParameter("playerAttack");
-
+        machetazo = false;
+        gun = false;    
         lifeText.text = hp.ToString();
     }
 

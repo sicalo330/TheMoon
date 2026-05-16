@@ -34,6 +34,7 @@ public class Character : MonoBehaviour
             FakeEnemy.obj.OutParameter("playerAttack");
             Player.obj.enemyDied = true;
             CombatController.obj.enemyAlive--;
+            CombatController.obj.selectedEnemy = null;
             CombatController.obj.backGroundAttack.SetActive(false);//Tengo que poner esto sí o sí
             Die();
         }
@@ -50,6 +51,7 @@ public class Character : MonoBehaviour
         yield return new WaitForSecondsRealtime(0.6f);
         Player.obj.OutParameter("playerAttack");
         FakeEnemy.obj.OutParameter("playerAttack");
+        Player.obj.OutParameter("machetazo");
         Player.obj.enemyDied = true; // avisa que murió
         CombatController.obj.buttonAtack.SetActive(false);
         CombatController.obj.enemyAlive--;
