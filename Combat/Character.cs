@@ -67,13 +67,4 @@ public class Character : MonoBehaviour
         transform.position = new Vector3(transform.position.x - mov, transform.position.y, transform.position.z);
         stateText.text = "";
     }
-
-    public IEnumerator ShowText(string text, float duration){
-        stateText.text = text;
-        yield return new WaitForSeconds(duration);
-        stateText.text = "";
-    }
-
-
-
 }

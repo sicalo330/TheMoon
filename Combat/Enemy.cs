@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class Enemy : Character
 {
+    [SerializeField] private AudioClip audioSelect;
     //Enemy hará dañoa Player, recordar que este último existe en las escenas para los combates
     public void Attack(Player player){
         select.SetActive(false);
@@ -13,6 +14,7 @@ public class Enemy : Character
 
     //Todos los enemigos tienen que detectar si el jugador les hizo click
     private void OnMouseDown(){
+        SoundManager.Instance.ExecuteSound(audioSelect);
         //Cuando se haga click, el controlador de combate seleccionará al enemigo
         CombatController.obj.SelectEnemy(this);
     }
@@ -36,7 +38,6 @@ public class Enemy : Character
             Player.obj.SetParameter("parry");
             yield return new WaitForSeconds(0.3f);
             Player.obj.OutParameter("parry");
-            //StartCoroutine(player.ShowText("Parry", 0.5f));
             TakeDamage(player.attack);
         }
         else{

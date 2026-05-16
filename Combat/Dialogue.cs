@@ -19,8 +19,7 @@ public class Dialogue : MonoBehaviour
         LoadDialogues(); // Cargar los diálogos al inicio
     }
 
-    void LoadDialogues()
-    {
+    void LoadDialogues(){
         TextAsset jsonFile = Resources.Load<TextAsset>("Dialogue"); //va a la carpeta en donde se encuentran los dialogos
         
         if (jsonFile == null){

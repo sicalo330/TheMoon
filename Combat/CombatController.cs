@@ -16,6 +16,9 @@ public class CombatController : MonoBehaviour
     [SerializeField] private float buttonOffsetX;
     [SerializeField] private float buttonOffsetY;
     [SerializeField] private Vector2 spawnOrigin = new Vector2(4f, 0f);
+    [SerializeField] private AudioClip audioDamage;
+    [SerializeField] private AudioClip audioTurn;
+    [SerializeField] private AudioClip audioParry;
     public static CombatController obj;
     public CombatState state;
     public int enemyCount = 0;
@@ -124,6 +127,7 @@ public class CombatController : MonoBehaviour
 
     //Ataque del jugador durante su turno
     public void PlayerAttack(){
+        SoundManager.Instance.ExecuteSound(audioDamage);
         StartCoroutine(PlayerAttackCoroutine());
     }
 
@@ -151,6 +155,7 @@ public class CombatController : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
         state = CombatState.EnemyTurn;
+        SoundManager.Instance.ExecuteSound(audioTurn);
 
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
             if(!enemy) continue;
@@ -169,7 +174,9 @@ public class CombatController : MonoBehaviour
 
             Player.obj.SetParameter("enemyAttack");
             FakeEnemy.obj.SetParameter("enemyAttack");
+            SoundManager.Instance.ExecuteSound(audioDamage);
 
+            //En sí este es el ataque del enemigo
             yield return StartCoroutine(enemy.AttackCoroutine(Player.obj));
             yield return new WaitForSeconds(0.4f);
 
@@ -187,6 +194,7 @@ public class CombatController : MonoBehaviour
 
         //La línea de abajo indica turno del jugador
         Player.obj.select.SetActive(true);
+        SoundManager.Instance.ExecuteSound(audioTurn);
         buttonAtackGun.SetActive(true);
         Player.obj.stateText.text = "";
         state = CombatState.PlayerTurn;

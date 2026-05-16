@@ -13,6 +13,9 @@ public class Player : Character
     [SerializeField]public bool canParry;
     [SerializeField]public bool parrySuccess;
     [SerializeField]public GameObject clickAdvice;
+    [SerializeField] private AudioClip audioTurn;
+    [SerializeField] private AudioClip audioDamage;
+    [SerializeField] private AudioClip audioParry;
     public bool canDoubleAttack = false;
     public bool doubleAttackSuccess;
     private bool doubleAttackAttempted;
@@ -32,7 +35,8 @@ public class Player : Character
         animator = GetComponent<Animator>();
         mainCamera = Camera.main;
         lifeText.text = hp.ToString();
-            select.SetActive(true); // jugador comienza primero
+        SoundManager.Instance.ExecuteSound(audioTurn);
+        select.SetActive(true); // jugador comienza primero
     }
 
     void Update(){        
@@ -169,10 +173,8 @@ public class Player : Character
                 //Repite la animación de ataque
                 FakeEnemy.obj.animator.Play("FakeEnemyTakeDamage", 0, 0f);
                 animator.Play("GunAttack", 0, 0f);
-                yield return StartCoroutine(ShowText("EPA!", 0.3f));
                 if(enemy != null){
                     enemy.TakeDamage(attack);
-                    StartCoroutine(CameraShake.obj.Shake());
                 }
 
                 if(enemy == null || enemyDied){
@@ -227,6 +229,7 @@ public class Player : Character
         if(!canParry)
             return;
 
+        SoundManager.Instance.ExecuteSound(audioParry);
         parrySuccess = true;
     }
 
@@ -239,6 +242,7 @@ public class Player : Character
         if(!canDoubleAttack)
             return;
 
+        SoundManager.Instance.ExecuteSound(audioDamage);
         hitSuccess = true;
         canDoubleAttack = false;
     }
@@ -260,12 +264,10 @@ public class Player : Character
         lifeText.text = "";
         SetParameter("playerAttack");
         FakeEnemy.obj.SetParameter("playerAttack");
-        
 
         CombatController.obj.backGroundAttack.SetActive(true);
 
         yield return new WaitForSeconds(0.6f); // espera al frame del disparo
-        StartCoroutine(CameraShake.obj.Shake());
 
         // Daña a todos los enemigos
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
