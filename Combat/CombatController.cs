@@ -155,11 +155,11 @@ public class CombatController : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
         state = CombatState.EnemyTurn;
-        SoundManager.Instance.ExecuteSound(audioTurn);
 
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
             if(!enemy) continue;
 
+            SoundManager.Instance.ExecuteImportantSound(audioTurn);
             textAdvice.text = GetRandomDialogue("ñero");
             containerAdvice.SetActive(true);
             
@@ -194,7 +194,7 @@ public class CombatController : MonoBehaviour
 
         //La línea de abajo indica turno del jugador
         Player.obj.select.SetActive(true);
-        SoundManager.Instance.ExecuteSound(audioTurn);
+        SoundManager.Instance.ExecuteImportantSound(audioTurn);
         buttonAtackGun.SetActive(true);
         Player.obj.stateText.text = "";
         state = CombatState.PlayerTurn;
