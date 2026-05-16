@@ -22,12 +22,15 @@ public class CombatController : MonoBehaviour
     public int enemyAlive = 0;
     public Enemy selectedEnemy;
     private Enemy[] enemies;
+    public List<string> ñeroText = new List<string>();
+    private DialogueList dialogueList; 
 
     void Awake(){
         obj = this;
     }
 
     void Start(){
+        LoadDialogues();
         //ESta variable es importante porque dicta cuántos enemigos van a haber en pantalla
         enemyCount = 1;
         SpawnEnemies();
@@ -152,7 +155,7 @@ public class CombatController : MonoBehaviour
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
             if(!enemy) continue;
 
-            textAdvice.text = "Venga papi que no e pa' eso";
+            textAdvice.text = GetRandomDialogue("ñero");
             containerAdvice.SetActive(true);
             
             if(!enemy) continue;
@@ -211,6 +214,68 @@ public class CombatController : MonoBehaviour
         } else {
             yield return StartCoroutine(EnemyTurn());
         }
+    }
+
+    /*
+    
+    void LoadDialogues(){
+        TextAsset jsonFile = Resources.Load<TextAsset>("Dialogue");
+        
+        if (jsonFile == null){
+            Debug.LogError("No se pudo cargar el archivo JSON. Verifica la ruta en Resources."); 
+            return;
+        }
+
+        dialogueList = JsonUtility.FromJson<DialogueList>(jsonFile.text);
+        
+        if (dialogueList == null || dialogueList.dialogues == null){
+            Debug.LogError("El JSON se cargó, pero no tiene diálogos válidos.");
+        }
+
+        
+        foreach(Dialogue dialogue in dialogueList.dialogues){
+            Debug.Log("ID: " + dialogue.id);
+            foreach(string line in dialogue.lines)
+            {
+                Debug.Log(line);
+            }
+        }
+    }
+    
+    a
+    */
+
+        void LoadDialogues(){
+            TextAsset jsonFile = Resources.Load<TextAsset>("Dialogue"); //va a la carpeta en donde se encuentran los dialogos
+            
+            if (jsonFile == null){
+                Debug.LogError("No se pudo cargar el archivo JSON. Verifica la ruta en Resources."); //Si el json no se encuentra en la localidad entonces  sacará esto
+                return;
+            }
+
+            dialogueList = JsonUtility.FromJson<DialogueList>(jsonFile.text);//Si lo anteriorr no sucede, es porque si existe el json y lo convertirá en una lista(creo)
+
+            if (dialogueList == null || dialogueList.dialogues == null){
+                Debug.LogError("El JSON se cargó, pero no tiene diálogos válidos."); //Si el json existe pero no tiene contenido pasará esto
+            }
+        }
+
+
+
+    string GetRandomDialogue(string dialogueId){
+        if(dialogueList == null || dialogueList.dialogues == null){
+            Debug.LogError("DialogueList no fue cargado");
+            return "...";
+        }
+
+        foreach(DialogueData dialogue in dialogueList.dialogues){
+            if(dialogue.id == dialogueId){
+                int randomIndex = Random.Range(0, dialogue.lines.Length);
+                return dialogue.lines[randomIndex];
+            }
+        }
+
+        return "...";
     }
 
 }

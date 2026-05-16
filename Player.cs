@@ -209,6 +209,12 @@ public class Player : Character
                 yield break;
             }
         }
+
+        OutParameter("machetazo");
+        OutParameter("playerAttack");
+        FakeEnemy.obj.OutParameter("playerAttack");
+        CombatController.obj.backGroundAttack.SetActive(false);
+        lifeText.text = hp.ToString();
     }
     
     public void TryParry(){
@@ -271,6 +277,7 @@ public class Player : Character
         CombatController.obj.backGroundAttack.SetActive(false);
         OutParameter("playerAttack");
         FakeEnemy.obj.OutParameter("playerAttack");
+        OutParameter("playerAttack");
         machetazo = false;
         gun = false;    
         lifeText.text = hp.ToString();
