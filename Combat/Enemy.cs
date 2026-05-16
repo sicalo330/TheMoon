@@ -33,7 +33,10 @@ public class Enemy : Character
         player.canParry = false;
 
         if(player.parrySuccess){
-            StartCoroutine(player.ShowText("Parry", 0.5f));
+            Player.obj.SetParameter("parry");
+            yield return new WaitForSeconds(0.3f);
+            Player.obj.OutParameter("parry");
+            //StartCoroutine(player.ShowText("Parry", 0.5f));
             TakeDamage(player.attack);
         }
         else{
