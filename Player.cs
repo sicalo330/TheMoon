@@ -12,6 +12,7 @@ public class Player : Character
     [SerializeField]public bool isCombat = false;
     [SerializeField]public bool canParry;
     [SerializeField]public bool parrySuccess;
+    [SerializeField]public GameObject clickAdvice;
     public bool canDoubleAttack = false;
     public bool doubleAttackSuccess;
     private bool doubleAttackAttempted;
@@ -38,6 +39,7 @@ public class Player : Character
         //Ataque
         if(Input.GetMouseButtonDown(0) && isCombat){
                 TryParry();
+                TryDoubleAttack();
         }
         
         //Movimiento del personaje
@@ -136,12 +138,14 @@ public class Player : Character
             yield return new WaitForSeconds(0.2f);
 
             canDoubleAttack = true;
-            stateText.text = "Otra vez";
+            clickAdvice.SetActive(true);
+            //stateText.text = "Otra vez";
 
             yield return new WaitForSeconds(0.4f);
 
             canDoubleAttack = false;
             stateText.text = "";
+            clickAdvice.SetActive(false);
 
             if(hitSuccess){
                 //Repite la animación de ataque

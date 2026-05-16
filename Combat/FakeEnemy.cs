@@ -6,6 +6,8 @@ public class FakeEnemy : MonoBehaviour
 {
     public static FakeEnemy obj;
     public Animator animator;
+    [SerializeField]public GameObject clickAdvice;
+
 
     void Awake(){
         obj = this;
