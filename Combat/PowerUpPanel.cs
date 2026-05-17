@@ -17,7 +17,7 @@ public class PowerUpPanel : MonoBehaviour
     }
 
     public void ChooseHp(){
-        Player.obj.hp += 10;
+        Player.obj.hp += 15;
         Player.obj.lifeText.text = Player.obj.hp.ToString();//Actualizar hp de una vez
         //PowerUpManager.ApplyHpBoost();
         Hide();
@@ -26,13 +26,13 @@ public class PowerUpPanel : MonoBehaviour
 
     public void ChooseGun(){
         //PowerUpManager.ApplyGunBoost();
-        Player.obj.attackGun += 1;
+        Player.obj.attackGun += 2;
         Hide();
         CombatController.obj.StartNextWave();
     }
 
     public void ChooseMachete(){
-        Player.obj.attackMachete += 2;
+        Player.obj.attackMachete += 4;
         //PowerUpManager.ApplyMacheteBoost();
         Hide();
         CombatController.obj.StartNextWave();

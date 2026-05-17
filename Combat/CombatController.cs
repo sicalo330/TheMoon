@@ -11,6 +11,7 @@ public class CombatController : MonoBehaviour
     [SerializeField] public GameObject buttonAtackGun;
     [SerializeField] public GameObject backGroundAttack;
     [SerializeField] private GameObject containerAdvice;
+    [SerializeField] private GameObject moonAnimation;
     [SerializeField] private TMP_Text textAdvice;
     [SerializeField] private float spacingY = 2f;
     [SerializeField] private float buttonOffsetX;
@@ -19,6 +20,8 @@ public class CombatController : MonoBehaviour
     [SerializeField] private AudioClip audioDamage;
     [SerializeField] private AudioClip audioTurn;
     [SerializeField] private PowerUpPanel powerUpPanel;
+    [SerializeField] private GameObject moonPrefab;
+    [SerializeField] private Vector2 moonSpawnPosition = new Vector2(4f, 0f);
     public static CombatController obj;
     public CombatState state;
     public int enemyCount = 0;
@@ -64,8 +67,72 @@ public class CombatController : MonoBehaviour
             powerUpPanel.Show();
         }
         else if(enemyAlive <= 0 && enemyCount >= 4){
-            Debug.Log("¡Combate ganado!");
+            SpawnMoon();
         }
+    }
+
+    void SpawnMoon(){
+        Instantiate(moonPrefab, moonSpawnPosition, Quaternion.identity);
+        moonAnimation.SetActive(false);
+        enemyAlive = 1;
+        enemies = FindObjectsOfType<Enemy>();
+        state = CombatState.EnemyTurn;
+        Player.obj.select.SetActive(false);
+        buttonAtack.SetActive(false);
+        buttonAtackGun.SetActive(false);
+        StartCoroutine(MoonTurn());
+    }
+
+    IEnumerator MoonTurn(){
+        yield return new WaitForSeconds(1f);
+
+        textAdvice.text = "Hagame un parry si es capaz pirobo";
+        containerAdvice.SetActive(true);
+
+        yield return new WaitForSeconds(2f);
+
+        containerAdvice.SetActive(false);
+
+        foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
+            if(!enemy) continue;
+
+            enemy.SetTurnIndicator(true);
+            SoundManager.Instance.ExecuteImportantSound(audioTurn);
+
+            yield return new WaitForSeconds(1f);
+
+            backGroundAttack.SetActive(true);
+            StartCoroutine(CameraShake.obj.Shake());
+            Player.obj.SetParameter("enemyAttack");
+            FakeMoon.obj.SetParameter("moonAttack");
+            SoundManager.Instance.ExecuteSound(audioDamage);
+
+            yield return StartCoroutine(enemy.AttackCoroutine(Player.obj));
+            yield return new WaitForSeconds(0.4f);
+
+            FakeMoon.obj.OutParameter("moonAttack");
+            Player.obj.OutParameter("enemyAttack");
+            backGroundAttack.SetActive(false);
+
+            if(enemy) enemy.SetTurnIndicator(false);
+
+            yield return new WaitForSeconds(1.1f);
+
+            if(Player.obj.parrySuccess){
+                SceneManager.LoadScene("Victory");
+                yield break;
+                // Cinemática de victoria
+                //SceneManager.LoadScene("CinematicaVictoria");
+            }
+
+            //yield return new WaitForSeconds(1.2f);
+        }
+
+        // turno del jugador
+        Player.obj.select.SetActive(true);
+        buttonAtackGun.SetActive(true);
+        SoundManager.Instance.ExecuteImportantSound(audioTurn);
+        state = CombatState.PlayerTurn;
     }
 
     public void StartNextWave(){

@@ -27,11 +27,13 @@ public class Enemy : Character
 
         yield return new WaitForSeconds(0.2f);
         FakeEnemy.obj.clickAdvice.SetActive(true);
+        FakeMoon.obj.clickAdvice.SetActive(true);
         player.canParry = true;
 
         yield return new WaitForSeconds(0.25f);
 
         FakeEnemy.obj.clickAdvice.SetActive(false);
+        FakeMoon.obj.clickAdvice.SetActive(false);
         player.canParry = false;
 
         if(player.parrySuccess){
