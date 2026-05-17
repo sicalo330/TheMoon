@@ -242,6 +242,7 @@ public class Player : Character
         if(!canDoubleAttack)
             return;
 
+        StartCoroutine(CameraShake.obj.Shake());
         SoundManager.Instance.ExecuteSound(audioDamage);
         hitSuccess = true;
         canDoubleAttack = false;

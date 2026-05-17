@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine;
 
@@ -25,9 +26,14 @@ public class Character : MonoBehaviour
     public virtual void TakeDamage(int damage){
         hp -= damage;
         lifeText.text = hp.ToString();
-        stateText.text = "Impacto";
 
         StartCoroutine(TakeDamageAnimation());
+
+        if(Player.obj.hp <= 0){
+            SceneManager.LoadScene("Menu");
+            StopAllCoroutines();
+            return;
+        }
 
         if(hp <= 0){
             Player.obj.OutParameter("playerAttack");

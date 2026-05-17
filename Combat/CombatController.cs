@@ -15,7 +15,7 @@ public class CombatController : MonoBehaviour
     [SerializeField] private float spacingY = 2f;
     [SerializeField] private float buttonOffsetX;
     [SerializeField] private float buttonOffsetY;
-    [SerializeField] private Vector2 spawnOrigin = new Vector2(4f, 0f);
+    [SerializeField] private Vector2 spawnOrigin = new Vector2(2f, -2f);
     [SerializeField] private AudioClip audioDamage;
     [SerializeField] private AudioClip audioTurn;
     [SerializeField] private AudioClip audioParry;
@@ -45,7 +45,7 @@ public class CombatController : MonoBehaviour
 
     void PutGun(){
         buttonAtackGun.transform.position = new Vector3(
-            Player.obj.transform.position.x - buttonOffsetX,
+            Player.obj.transform.position.x + buttonOffsetX,
             Player.obj.transform.position.y,
             0f
         );
@@ -88,23 +88,23 @@ public class CombatController : MonoBehaviour
 
             case 2:
                 // Fila diagonal "/"
-                positions.Add(center + new Vector2( 0.6f,  s * 0.7f));
-                positions.Add(center + new Vector2(-0.6f, -s * 0.7f));
+                positions.Add(center + new Vector2( 1f,  s * 0.5f));
+                positions.Add(center + new Vector2(-1f, -s * 0.5f));
                 break;
 
             case 3:
                 // Triángulo "<|" punta a la izquierda
                 positions.Add(center + new Vector2(-s * 0.8f,  0f));     // punta izquierda
-                positions.Add(center + new Vector2( s * 0.8f,  s * 0.8f)); // arriba derecha
-                positions.Add(center + new Vector2( s * 0.8f, -s * 0.8f)); // abajo derecha
+                positions.Add(center + new Vector2( s * 0.8f,  s * 0.6f)); // arriba derecha
+                positions.Add(center + new Vector2( s * 2.6f, 0f)); // abajo derecha
                 break;
 
             case 4:
                 // Anillo
-                positions.Add(center + new Vector2( 0f,  s * 0.9f)); // arriba
-                positions.Add(center + new Vector2( 0f, -s * 0.9f)); // abajo
-                positions.Add(center + new Vector2( s * 0.9f,  0f)); // derecha
-                positions.Add(center + new Vector2(-s * 0.9f,  0f)); // izquierda
+                positions.Add(center + new Vector2( 1.5f,  s * 0.8f)); // arriba
+                positions.Add(center + new Vector2( 1f, -s * 0.3f)); // abajo
+                positions.Add(center + new Vector2( s * 2f,  0.3f)); // derecha
+                positions.Add(center + new Vector2(-s * 0.9f,  0.3f)); // izquierda
                 break;
         }
 
@@ -118,7 +118,7 @@ public class CombatController : MonoBehaviour
         selectedEnemy = enemy;
 
         buttonAtack.transform.position = new Vector3(
-            enemy.transform.position.x - buttonOffsetX,
+            enemy.transform.position.x + buttonOffsetX,
             enemy.transform.position.y,
             enemy.transform.position.z
         );
