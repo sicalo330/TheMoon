@@ -6,7 +6,14 @@ using UnityEngine;
 public class MenuSystem : MonoBehaviour
 {
     [SerializeField]private string scene;
+    [SerializeField] private AudioClip menuMusic;
+
+    void Start(){
+        SoundManager.Instance.PlayMusic(menuMusic);
+    }
+
     public void ChangeScene(string scene){
+        SoundManager.Instance.StopMusic();
         SceneManager.LoadScene(scene);
     }
 

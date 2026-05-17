@@ -1,27 +1,56 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SceneLoadManager : MonoBehaviour
 {
-    private Animator animator;
-    [SerializeField] private AnimationClip finalAnimation;
+    public static SceneLoadManager obj;
+    [SerializeField] private CanvasGroup panel;
+    [SerializeField] private float fadeDuration = 0.5f;
 
-    // Start is called before the first frame update
+    void Awake(){
+        if(obj == null){
+            obj = this;
+            DontDestroyOnLoad(gameObject);
+        } else {
+            Destroy(gameObject);
+            return;
+        }
+    }
+
     void Start(){
-        animator = GetComponent<Animator>();
+        StartCoroutine(FadeIn());
     }
 
-    public void LoadScene(string escene){
-        StartCoroutine(ChangeScene(escene));
+    public void LoadScene(string scene){
+        SoundManager.Instance.StopMusic();
+        StartCoroutine(FadeOutAndLoad(scene));
     }
 
-    IEnumerator ChangeScene(string escene){
-        animator.SetTrigger("StartTransition");
-        yield return new WaitForSeconds(finalAnimation.length);
+    IEnumerator FadeIn(){
+        panel.alpha = 1f;
+        float elapsed = 0f;
+        while(elapsed < fadeDuration){
+            elapsed += Time.deltaTime;
+            panel.alpha = 1f - (elapsed / fadeDuration);
+            yield return null;
+        }
+        panel.alpha = 0f;
+        panel.blocksRaycasts = false;
+    }
 
-        SceneManager.LoadScene(escene);
-
+    IEnumerator FadeOutAndLoad(string scene){
+        panel.blocksRaycasts = true;
+        float elapsed = 0f;
+        while(elapsed < fadeDuration){
+            elapsed += Time.deltaTime;
+            panel.alpha = elapsed / fadeDuration;
+            yield return null;
+        }
+        panel.alpha = 1f;
+        SceneManager.LoadScene(scene);
+        yield return null; // espera un frame
+        StartCoroutine(FadeIn()); // ← fade in en la nueva escena
     }
 }

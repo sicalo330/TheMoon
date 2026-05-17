@@ -8,6 +8,7 @@ public class PowerUpPanel : MonoBehaviour
 
     public void Show(){
         gameObject.SetActive(true);
+        CombatController.obj.buttonAtack.SetActive(false);
         Time.timeScale = 0f; // pausa el juego
     }
 

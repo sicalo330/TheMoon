@@ -19,6 +19,7 @@ public class CombatController : MonoBehaviour
     [SerializeField] private Vector2 spawnOrigin = new Vector2(2f, -2f);
     [SerializeField] private AudioClip audioDamage;
     [SerializeField] private AudioClip audioTurn;
+    [SerializeField] private AudioClip combatMusic;
     [SerializeField] private PowerUpPanel powerUpPanel;
     [SerializeField] private GameObject moonPrefab;
     [SerializeField] private Vector2 moonSpawnPosition = new Vector2(4f, 0f);
@@ -37,6 +38,7 @@ public class CombatController : MonoBehaviour
 
     void Start(){
         LoadDialogues();
+        SoundManager.Instance.PlayMusic(combatMusic);
         //ESta variable es importante porque dicta cuántos enemigos van a haber en pantalla
         enemyCount = 1;
         SpawnEnemies();
