@@ -12,7 +12,7 @@ public class Character : MonoBehaviour
     [SerializeField]public int attack;
     [SerializeField]public bool isPlayer;
     [SerializeField] public TMP_Text stateText;
-    [SerializeField] protected TMP_Text lifeText;
+    [SerializeField] public TMP_Text lifeText;
 
     void Start(){
         lifeText.text = hp.ToString();
@@ -31,6 +31,7 @@ public class Character : MonoBehaviour
 
         if(Player.obj.hp <= 0){
             SceneManager.LoadScene("Menu");
+            //PowerUpManager.Reset();
             StopAllCoroutines();
             return;
         }

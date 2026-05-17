@@ -38,7 +38,7 @@ public class Enemy : Character
             Player.obj.SetParameter("parry");
             yield return new WaitForSeconds(0.3f);
             Player.obj.OutParameter("parry");
-            TakeDamage(player.attack);
+            TakeDamage(player.attackMachete);
         }
         else{
             player.TakeDamage(attack);

@@ -7,9 +7,8 @@ using UnityEngine;
 public class Player : Character
 {
     public static Player obj;
-    //[SerializeField]private float maxSpeed = 10f;
-    [SerializeField]private float minY;
-    //[SerializeField]public bool isCombat = false;
+    [SerializeField] public int attackMachete;
+    [SerializeField] public int attackGun;
     [SerializeField]public bool canParry;
     [SerializeField]public bool parrySuccess;
     [SerializeField]public GameObject clickAdvice;
@@ -121,7 +120,7 @@ public class Player : Character
             if(CombatController.obj.selectedEnemy != null){
                 yield return new WaitForSeconds(0.6f);
                 //ESta línea le quita el hp al enemigo, es solo eta
-                CombatController.obj.selectedEnemy.TakeDamage(attack);
+                CombatController.obj.selectedEnemy.TakeDamage(attackMachete);
             }
         }
 
@@ -272,7 +271,7 @@ public class Player : Character
 
         // Daña a todos los enemigos
         foreach(Enemy enemy in FindObjectsOfType<Enemy>()){
-            if(enemy) enemy.TakeDamage(attack);
+            if(enemy) enemy.TakeDamage(attackGun);
         }
 
         yield return new WaitForSeconds(0.3f);

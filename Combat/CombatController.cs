@@ -18,7 +18,7 @@ public class CombatController : MonoBehaviour
     [SerializeField] private Vector2 spawnOrigin = new Vector2(2f, -2f);
     [SerializeField] private AudioClip audioDamage;
     [SerializeField] private AudioClip audioTurn;
-    [SerializeField] private AudioClip audioParry;
+    [SerializeField] private PowerUpPanel powerUpPanel;
     public static CombatController obj;
     public CombatState state;
     public int enemyCount = 0;
@@ -61,18 +61,29 @@ public class CombatController : MonoBehaviour
 
     public void CheckWaveCompletion(){
         if(enemyAlive <= 0 && enemyCount < 4){
-            enemyCount++;
-            SpawnEnemies();
-            enemyAlive = enemyCount;
-            enemies = FindObjectsOfType<Enemy>();
-            state = CombatState.PlayerTurn;
-            Player.obj.select.SetActive(true);
-            buttonAtack.SetActive(false);
-            buttonAtackGun.SetActive(true);
+            powerUpPanel.Show();
         }
         else if(enemyAlive <= 0 && enemyCount >= 4){
             Debug.Log("¡Combate ganado!");
         }
+    }
+
+    public void StartNextWave(){
+        enemyCount++;
+        SpawnEnemies();
+        enemyAlive = enemyCount;
+        enemies = FindObjectsOfType<Enemy>();
+
+        foreach(Enemy enemy in enemies){
+            enemy.hp += enemyCount * 2;
+            enemy.attack += enemyCount + 1;
+            enemy.lifeText.text = enemy.hp.ToString();
+        }
+
+        state = CombatState.PlayerTurn;
+        Player.obj.select.SetActive(true);
+        buttonAtack.SetActive(false);
+        buttonAtackGun.SetActive(true);
     }
 
     List<Vector2> GetSpawnPositions(int count){
