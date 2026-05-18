@@ -18,6 +18,10 @@ public class MenuSystem : MonoBehaviour
     }
 
     public void GoOut(){
-        Debug.Log("Jugador sale");
+        Application.Quit();
+    }
+
+    public void ButtonLoadScene(string scene){
+        SceneLoadManager.obj.LoadScene(scene);
     }
 }

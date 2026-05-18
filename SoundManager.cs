@@ -39,4 +39,8 @@ public class SoundManager : MonoBehaviour
     public void StopMusic(){
         musicSource.Stop();
     }
+
+    public bool IsMusicPlaying(){
+        return musicSource.isPlaying;
+    }
 }

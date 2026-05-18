@@ -33,7 +33,7 @@ public class PowerUpPanel : MonoBehaviour
     }
 
     public void ChooseMachete(){
-        Player.obj.attackMachete += 4;
+        Player.obj.attackMachete += 2;
         //PowerUpManager.ApplyMacheteBoost();
         Hide();
         CombatController.obj.StartNextWave();

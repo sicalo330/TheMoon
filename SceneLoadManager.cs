@@ -24,7 +24,10 @@ public class SceneLoadManager : MonoBehaviour
     }
 
     public void LoadScene(string scene){
-        SoundManager.Instance.StopMusic();
+        Debug.Log("Cargando escena");
+        if(SoundManager.Instance.IsMusicPlaying()){
+            SoundManager.Instance.StopMusic();
+        }
         StartCoroutine(FadeOutAndLoad(scene));
     }
 
